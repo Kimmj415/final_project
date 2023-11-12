@@ -11,10 +11,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -23,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText mEmail, mPassword;
     private Button Login_button;
     private FirebaseAuth mAuth= FirebaseAuth.getInstance();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     public void onStart() {
@@ -30,9 +35,10 @@ public class MainActivity extends AppCompatActivity {
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser != null && currentUser.isEmailVerified()){
-            Toast.makeText(MainActivity.this, "자동 로그인, 환영합니다"+ currentUser.getUid(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "자동 로그인.", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(MainActivity.this, UserMainActivity.class));
             reload();
+
         }
     }
     private void reload() { }
@@ -57,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
                                     FirebaseUser user = mAuth.getCurrentUser();
                                     if(user.isEmailVerified()) {
                                         if (user != null) {
-                                            Toast.makeText(MainActivity.this, "로그인 성공." + user.getUid(), Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(MainActivity.this, "로그인 성공.", Toast.LENGTH_SHORT).show();
                                             startActivity(new Intent(MainActivity.this, UserMainActivity.class));
                                         }
                                     }
