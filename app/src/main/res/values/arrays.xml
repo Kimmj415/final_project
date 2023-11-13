@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="category_array">
+        <item>선택</item>
+        <item>기능 추가</item>
+        <item>버그</item>
+        <item>탈퇴</item>
+        <item>기타</item>
+    </string-array>
+</resources>

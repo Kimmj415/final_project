@@ -10,9 +10,11 @@ public class Post {
 
     private String timestamp;
     private String postId;
+    private String comment;
 
     public Post() {
     }
+
 
     public Post(String userId, String title, String contents, String timestamp) {
         this.userId = userId;
@@ -21,12 +23,12 @@ public class Post {
         this.timestamp = timestamp;
     }
 
-    public Post(String userId, String title, String contents, String timestamp, String postId) {
+    public Post(String userId, String title, String contents, String timestamp, String comment) {
         this.userId = userId;
         this.title = title;
         this.contents = contents;
         this.timestamp = timestamp;
-        this.postId=postId;
+        this.comment=comment;
     }
 
     public Post(String userId, String title, String contents) {
@@ -83,5 +85,13 @@ public class Post {
 
     public void setPostId(String postId) {
         this.postId = postId;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }
