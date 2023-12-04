@@ -100,6 +100,8 @@ public class SignupActivity extends AppCompatActivity {
                                             userMap.put("bookmarks", bookmark);
                                             List<String> mypost = new ArrayList<>();
                                             userMap.put("myposts", mypost);
+                                            List<String> goods = new ArrayList<>();
+                                            userMap.put("goods", goods);
                                             mStore.collection("user").document(user.getUid()).set(userMap, SetOptions.merge());
                                             finish();
                                         }

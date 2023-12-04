@@ -12,6 +12,8 @@ public class Post {
     private String postId;
     private String comment;
 
+    private int good;
+
     public Post() {
     }
 
@@ -21,6 +23,7 @@ public class Post {
         this.title = title;
         this.contents = contents;
         this.timestamp = timestamp;
+        this.good=0;
     }
 
     public Post(String userId, String title, String contents, String timestamp, String comment) {
@@ -60,6 +63,8 @@ public class Post {
     public void setContents(String content) {
         this.contents = content;
     }
+
+    public int getgood(){return this.good;}
 
     @Override
     public String toString() {

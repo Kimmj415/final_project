@@ -21,6 +21,7 @@ import com.google.api.Context;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.teamproject2.PostDetailActivity;
+import com.teamproject2.SignupActivity;
 import com.teamproject2.models.Post;
 import com.teamproject2.R;
 
@@ -60,8 +61,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         else{
             holder.contentTextView.setText(post.getContents());
         }
-        holder.timeTextView.setText(post.getTimestamp().toString());
+        String count=Integer.toString(post.getgood());
 
+        holder.timeTextView.setText(post.getTimestamp().toString());
+        holder.goodCountTextView.setText(count);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -93,13 +96,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public TextView contentTextView;
         public TextView timeTextView;
         public TextView reportButton;
-
+        public TextView goodCountTextView;
         public ViewHolder(View itemView) {
             super(itemView);
             titleTextView = itemView.findViewById(R.id.item_post_title);
             contentTextView = itemView.findViewById(R.id.item_post_contents);
             timeTextView=itemView.findViewById(R.id.item_post_time);
             reportButton = itemView.findViewById(R.id.reportpost_button);
+            goodCountTextView=itemView.findViewById(R.id.item_post_goodcount);
         }
     }
 

@@ -29,6 +29,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -55,7 +57,9 @@ public class PostDetailActivity extends AppCompatActivity {
     private TextView dateTextView;
     private TextView contentTextView;
     private boolean isBookmark = false;
-    ImageView bookmark;
+    private boolean isGood = false;
+    private ImageView bookmark;
+    private ImageView good;
     private EditText commentEditText;
     private Button registerButton;
     private FirebaseFirestore db;
@@ -75,6 +79,7 @@ public class PostDetailActivity extends AppCompatActivity {
         dateTextView = findViewById(R.id.date_tv);
         contentTextView = findViewById(R.id.content_tv);
         optionImageView=findViewById(R.id.option);
+        good=findViewById(R.id.good);
         commentEditText = findViewById(R.id.comment_et);
         registerButton = findViewById(R.id.reg_button);
         bookmark=findViewById(R.id.bookmark);
@@ -99,6 +104,18 @@ public class PostDetailActivity extends AppCompatActivity {
                     removeshowConfirmationDialog(postId);
                 } else {
                     addshowConfirmationDialog(postId);
+                }
+            }
+        });
+
+        checkIfgood(postId);
+        good.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isGood) {
+                    removeshowConfirmationDialogGood(postId);
+                } else {
+                    addshowConfirmationDialogGood(postId);
                 }
             }
         });
@@ -232,6 +249,28 @@ public class PostDetailActivity extends AppCompatActivity {
                 });
     }
 
+    private void checkIfgood(String postId) {
+        db.collection("user").document(userId)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        if (documentSnapshot.exists()) {
+                            List<String> goods = (List<String>) documentSnapshot.get("goods");
+                            if (goods != null && goods.contains(postId)) {
+                                // 해당 게시판이 즐겨찾기 목록에 있는 경우
+                                good.setImageResource(R.drawable.round_favorite_24);
+                                isGood = true;
+                            } else {
+                                // 해당 게시판이 즐겨찾기 목록에 없는 경우
+                                good.setImageResource(R.drawable.round_favorite_border_24);
+                                isGood = false;
+                            }
+                        }
+                    }
+                });
+    }
+
     private void addTobookmark(String postId) {
         db.collection("user").document(userId)
                 .get()
@@ -259,6 +298,76 @@ public class PostDetailActivity extends AppCompatActivity {
                 });
     }
 
+    private void addToGood(String postId) {
+        db.collection("user").document(userId)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        if (documentSnapshot.exists()) {
+                            List<String> goods = (List<String>) documentSnapshot.get("goods");
+                            if (goods == null) {
+                                goods = new ArrayList<>();
+                            }
+                            goods.add(postId);
+                            db.collection("user").document(userId)
+                                    .update("goods", goods)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            // 즐겨찾기 목록에 추가한 경우 아이콘 변경
+                                            good.setImageResource(R.drawable.round_favorite_24);
+                                            countUpGood(postId);
+                                            isGood = true;
+                                        }
+                                    });
+                        }
+                    }
+                });
+    }
+
+    private void countUpGood(String postId){
+        CollectionReference boardCollection = db.collection("board");
+
+        // postId에 해당하는 문서 참조
+        DocumentReference postDocument = boardCollection.document(postId);
+
+        // 문서를 가져와서 good 필드를 1만큼 증가시킴
+        postDocument.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                // 문서가 존재하는 경우
+                if (task.getResult().exists()) {
+                    // 현재 good 값 가져오기
+                    Long currentGood = task.getResult().getLong("good");
+
+                    // good 값을 1만큼 증가시키기
+                    if (currentGood != null) {
+                        Long newGood = currentGood + 1;
+
+                        // 업데이트할 데이터 생성
+                        // 여기에서 "good"는 필드의 이름이며, newGood는 증가된 값입니다.
+                        postDocument.update("good", newGood)
+                                .addOnSuccessListener(aVoid -> {
+                                    // 성공적으로 업데이트된 경우
+                                    // 이 곳에서 필요한 추가 작업을 수행할 수 있습니다.
+                                })
+                                .addOnFailureListener(e -> {
+                                    // 업데이트 중 오류가 발생한 경우
+                                    // 이 곳에서 오류 처리를 수행할 수 있습니다.
+                                });
+                    }
+                } else {
+                    // postId에 해당하는 문서가 없는 경우
+                    // 이 곳에서 적절한 처리를 수행할 수 있습니다.
+                }
+            } else {
+                // 문서 가져오기 중 오류가 발생한 경우
+                // 이 곳에서 오류 처리를 수행할 수 있습니다.
+            }
+        });
+    }
+
+
     private void removeFrombookmark(String postId) {
         db.collection("user").document(userId)
                 .get()
@@ -284,6 +393,76 @@ public class PostDetailActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    private void removeGood(String postId) {
+        db.collection("user").document(userId)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        if (documentSnapshot.exists()) {
+                            List<String> goods = (List<String>) documentSnapshot.get("goods");
+                            if (goods != null) {
+                                goods.remove(postId);
+                                // Firestore에 업데이트된 favoriteBoards 리스트 저장
+                                db.collection("user").document(userId)
+                                        .update("goods", goods)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                // 즐겨찾기 목록에서 제거한 경우 아이콘 변경
+                                                good.setImageResource(R.drawable.round_favorite_border_24);
+                                                countDowngood(postId);
+                                                isGood = false;
+                                            }
+                                        });
+                            }
+                        }
+                    }
+                });
+    }
+
+    private void countDowngood(String postId){
+
+        CollectionReference boardCollection = db.collection("board");
+
+        // postId에 해당하는 문서 참조
+        DocumentReference postDocument = boardCollection.document(postId);
+
+        // 문서를 가져와서 good 필드를 1만큼 감소시킴
+        postDocument.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                // 문서가 존재하는 경우
+                if (task.getResult().exists()) {
+                    // 현재 good 값 가져오기
+                    Long currentGood = task.getResult().getLong("good");
+
+                    // good 값을 1만큼 감소시키기
+                    if (currentGood != null) {
+                        Long newGood = currentGood - 1;
+
+                        // 업데이트할 데이터 생성
+                        // 여기에서 "good"는 필드의 이름이며, newGood는 감소된 값입니다.
+                        postDocument.update("good", newGood)
+                                .addOnSuccessListener(aVoid -> {
+                                    // 성공적으로 업데이트된 경우
+                                    // 이 곳에서 필요한 추가 작업을 수행할 수 있습니다.
+                                })
+                                .addOnFailureListener(e -> {
+                                    // 업데이트 중 오류가 발생한 경우
+                                    // 이 곳에서 오류 처리를 수행할 수 있습니다.
+                                });
+                    }
+                } else {
+                    // postId에 해당하는 문서가 없는 경우
+                    // 이 곳에서 적절한 처리를 수행할 수 있습니다.
+                }
+            } else {
+                // 문서 가져오기 중 오류가 발생한 경우
+                // 이 곳에서 오류 처리를 수행할 수 있습니다.
+            }
+        });
     }
 
     private void removemyposts(String postId){
@@ -361,6 +540,31 @@ public class PostDetailActivity extends AppCompatActivity {
         builder.create().show();
     }
 
+    private void addshowConfirmationDialogGood(final String postId) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("게시글 공감");
+        builder.setMessage("게시글에 공감을 하시겠습니까?");
+
+        builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // 사용자가 확인을 눌렀을 때 실행되는 코드
+                addToGood(postId);
+            }
+        });
+
+        builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // 사용자가 취소를 눌렀을 때 실행되는 코드
+                // 여기서는 아무 동작 없음
+            }
+        });
+
+        // 알림 창 표시
+        builder.create().show();
+    }
+
     private void removeshowConfirmationDialog(final String postId) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("스크랩 취소");
@@ -371,6 +575,31 @@ public class PostDetailActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 // 사용자가 확인을 눌렀을 때 실행되는 코드
                 removeFrombookmark(postId);
+            }
+        });
+
+        builder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // 사용자가 취소를 눌렀을 때 실행되는 코드
+                // 여기서는 아무 동작 없음
+            }
+        });
+
+        // 알림 창 표시
+        builder.create().show();
+    }
+
+    private void removeshowConfirmationDialogGood(final String postId) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("공감 취소");
+        builder.setMessage("게시글 공감을 취소하시겠습니까?");
+
+        builder.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // 사용자가 확인을 눌렀을 때 실행되는 코드
+                removeGood(postId);
             }
         });
 
