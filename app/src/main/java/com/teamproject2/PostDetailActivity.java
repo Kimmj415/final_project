@@ -59,6 +59,7 @@ public class PostDetailActivity extends AppCompatActivity {
     private EditText commentEditText;
     private Button registerButton;
     private FirebaseFirestore db;
+    private ImageView backbutton;
     private FirebaseAuth mAuth=FirebaseAuth.getInstance();
     private String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
@@ -78,6 +79,13 @@ public class PostDetailActivity extends AppCompatActivity {
         registerButton = findViewById(R.id.reg_button);
         bookmark=findViewById(R.id.bookmark);
         db = FirebaseFirestore.getInstance();
+        backbutton=findViewById(R.id.backbutton);
+        backbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(PostDetailActivity.this, BoardActivity.class));
+            }
+        });
 
         String authorId = getIntent().getStringExtra("AUTHOR_ID");
         String date = getIntent().getStringExtra("DATE");
@@ -179,7 +187,7 @@ public class PostDetailActivity extends AppCompatActivity {
                                     contentTextView.setText(post.getContents().toString());
                                 }
                             } else {
-                                Toast.makeText(PostDetailActivity.this, "일치하는 게시물 없음", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(PostDetailActivity.this, "삭제되었거나 존재하지 않는 게시물입니다.", Toast.LENGTH_SHORT).show();
                             }
                         } else {
                             Toast.makeText(PostDetailActivity.this, "데이터 로딩 실패.", Toast.LENGTH_SHORT).show();
@@ -278,6 +286,30 @@ public class PostDetailActivity extends AppCompatActivity {
                 });
     }
 
+    private void removemyposts(String postId){
+        db.collection("user").document(userId)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        if (documentSnapshot.exists()) {
+                            List<String> myposts = (List<String>) documentSnapshot.get("myposts");
+                            if (myposts != null) {
+                                myposts.remove(postId);
+                                db.collection("user").document(userId)
+                                        .update("myposts", myposts)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                            }
+                                        });
+                            }
+                        }
+                    }
+                });
+    }
+
+
     private void showPopupMenu(View view, String authorId, String postId) {
         PopupMenu popupMenu = new PopupMenu(this, view);
         popupMenu.inflate(R.menu.menu_options);
@@ -289,6 +321,7 @@ public class PostDetailActivity extends AppCompatActivity {
                 if(menuItem.getItemId()==R.id.menu_delete) {
                     if(authorId.equals(userId)) {
                         deletePost(postId);
+                        removemyposts(postId);
                     }
                     else{
                         Toast.makeText(PostDetailActivity.this, "글의 작성자만 게시글을 삭제할 수 있습니다.", Toast.LENGTH_SHORT).show();

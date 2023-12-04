@@ -42,6 +42,7 @@ public class SignupActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore mStore= FirebaseFirestore.getInstance();
     private TextView back_button;
+    private String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,6 +98,8 @@ public class SignupActivity extends AppCompatActivity {
                                             userMap.put(User.password, mPasswordText.getText().toString());
                                             List<String> bookmark = new ArrayList<>();
                                             userMap.put("bookmarks", bookmark);
+                                            List<String> mypost = new ArrayList<>();
+                                            userMap.put("myposts", mypost);
                                             mStore.collection("user").document(user.getUid()).set(userMap, SetOptions.merge());
                                             finish();
                                         }

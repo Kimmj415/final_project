@@ -38,11 +38,11 @@ public class BoardActivity extends AppCompatActivity {
 
     private FloatingActionButton board_add_button;
     private RecyclerView recyclerView;
+    private ImageView backbutton;
     private RecyclerViewAdapter adapter;
     private List<Post> posts = new ArrayList<>();
     private FirebaseFirestore db;
     private SearchView searchView;
-    private ImageView backbutton;
     private String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +52,13 @@ public class BoardActivity extends AppCompatActivity {
         board_add_button = findViewById(R.id.board_add_button);
         searchView = findViewById(R.id.searchView);
         recyclerView = findViewById(R.id.postRecyclerView);
-        backbutton=findViewById(R.id.back_button);
+        backbutton=findViewById(R.id.backbutton);
+        backbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(BoardActivity.this, UserMainActivity.class));
+            }
+        });
 
         fetchPostsFromFirestore();
 
@@ -106,13 +112,6 @@ public class BoardActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(BoardActivity.this));
         adapter = new RecyclerViewAdapter(posts, BoardActivity.this);
         recyclerView.setAdapter(adapter);
-
-        backbutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(BoardActivity.this, UserMainActivity.class ));
-            }
-        });
 
         board_add_button.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -2,6 +2,7 @@ package com.teamproject2;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -34,6 +36,9 @@ public class NewCsPostActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private String selectedCategory;
+    private ImageView backbutton;
+
+    private String target;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +49,13 @@ public class NewCsPostActivity extends AppCompatActivity {
         editTextContent = findViewById(R.id.content_et);
         submitButton = findViewById(R.id.reg_button);
         db = FirebaseFirestore.getInstance();
+        backbutton=findViewById(R.id.backbutton);
+        backbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(NewCsPostActivity.this, CSBoardActivity.class));
+            }
+        });
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 this,
@@ -77,9 +89,8 @@ public class NewCsPostActivity extends AppCompatActivity {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                 String formattedDate = sdf.format(currentDate);
                 String timestamp = formattedDate.toString();
-
-                savePostToFirestore(title, content, author, timestamp);
                 savePostToFirestore2(title, content, author, timestamp);
+                savePostToFirestore(title, content, author, timestamp);
             }
         });
     }
@@ -99,6 +110,7 @@ public class NewCsPostActivity extends AppCompatActivity {
                             String documentId = task.getResult().getId();
                             Map<String, Object> data = new HashMap<>();
                             data.put("postId", documentId);
+                            data.put("target",target);
                             db.collection(collectionPath).document(documentId)
                                     .set(data, SetOptions.merge()) // 문서를 업데이트 또는 생성 (merge 옵션을 사용하여 중복 방지)
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -133,6 +145,7 @@ public class NewCsPostActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<DocumentReference> task) {
                         if (task.isSuccessful()) {
                             String documentId = task.getResult().getId();
+                            target=documentId;
                             Map<String, Object> data = new HashMap<>();
                             data.put("postId", documentId);
                             db.collection(collectionPath).document(documentId)

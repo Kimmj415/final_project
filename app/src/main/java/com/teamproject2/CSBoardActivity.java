@@ -35,7 +35,6 @@ public class CSBoardActivity extends AppCompatActivity {
     private CsPostAdapter adapter;
     private List<Post> posts = new ArrayList<>();
     private FirebaseFirestore db;
-    private SearchView searchView;
     private ImageView backbutton;
     private String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
@@ -45,69 +44,20 @@ public class CSBoardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_csboard);
 
         board_add_button = findViewById(R.id.board_add_button);
-        searchView = findViewById(R.id.searchView);
         recyclerView = findViewById(R.id.postRecyclerView);
-        backbutton=findViewById(R.id.back_button);
+        backbutton=findViewById(R.id.backbutton);
+        backbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(CSBoardActivity.this, UserMainActivity.class));
+            }
+        });
 
         fetchPostsFromFirestore();
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                List<Post> filteredPosts = new ArrayList<>();
-                for (Post post : posts) {
-
-                    if (post.getTitle().toLowerCase().contains(query.toLowerCase())) {
-                        filteredPosts.add(post);
-                    }
-                }
-                recyclerView.setLayoutManager(new LinearLayoutManager(CSBoardActivity.this));
-                adapter = new CsPostAdapter(filteredPosts,CSBoardActivity.this);
-                recyclerView.setAdapter(adapter);
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                List<Post> filteredPosts = new ArrayList<>();
-                JaccardSimilarity similarity = new JaccardSimilarity();
-                for (Post post : posts) {
-                    if(similarity.apply(post.getTitle().toLowerCase(),newText.toLowerCase())>0.4||similarity.apply(post.getContents().toLowerCase(),newText.toLowerCase())>0.4){
-                        filteredPosts.add(post);
-                    }
-                    else {
-                        if (post.getTitle().toLowerCase().contains(newText.toLowerCase()) || post.getContents().toLowerCase().contains(newText.toLowerCase())) {
-                            filteredPosts.add(post);
-                        }
-                    }
-                }
-                recyclerView.setLayoutManager(new LinearLayoutManager(CSBoardActivity.this));
-                adapter = new CsPostAdapter(filteredPosts,CSBoardActivity.this);
-                recyclerView.setAdapter(adapter);
-                return true;
-            }
-        });
-
-        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                recyclerView.setLayoutManager(new LinearLayoutManager(CSBoardActivity.this));
-                adapter = new CsPostAdapter(posts,CSBoardActivity.this);
-                recyclerView.setAdapter(adapter);
-                return false;
-            }
-        });
 
         recyclerView.setLayoutManager(new LinearLayoutManager(CSBoardActivity.this));
         adapter = new CsPostAdapter(posts, CSBoardActivity.this);
         recyclerView.setAdapter(adapter);
-
-        backbutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(CSBoardActivity.this, UserMainActivity.class ));
-            }
-        });
 
         board_add_button.setOnClickListener(new View.OnClickListener() {
             @Override

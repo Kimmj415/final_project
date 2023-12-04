@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.teamproject2"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -49,7 +49,11 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
     implementation ("com.google.android.gms:play-services-maps:17.0.1")
+    implementation ("com.squareup.picasso:picasso:2.71828")
     implementation ("org.apache.commons:commons-lang3:3.12.0")
     implementation ("org.apache.commons:commons-math3:3.6.1")
     implementation ("org.apache.commons:commons-text:1.9")
+    implementation ("org.jsoup:jsoup:1.14.3")
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
 }

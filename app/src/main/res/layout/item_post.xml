@@ -49,7 +49,8 @@
         android:layout_height="1dp"
         android:layout_marginTop="4dp"
         android:background="#000"
-        app:layout_constraintTop_toBottomOf="@+id/item_post_contents" />
+        app:layout_constraintTop_toBottomOf="@+id/item_post_contents"
+        tools:layout_editor_absoluteX="0dp" />
 
     <android.widget.Button
         android:id="@+id/reportpost_button"

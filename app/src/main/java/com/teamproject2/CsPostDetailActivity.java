@@ -2,7 +2,9 @@ package com.teamproject2;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +34,7 @@ public class CsPostDetailActivity extends AppCompatActivity {
     private TextView dateTextView;
     private TextView contentTextView;
     private TextView commentTextView;
+    private ImageView backbutton;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth=FirebaseAuth.getInstance();
 
@@ -44,6 +47,13 @@ public class CsPostDetailActivity extends AppCompatActivity {
         contentTextView = findViewById(R.id.content_tv);
         commentTextView=findViewById(R.id.comment_tv);
         db = FirebaseFirestore.getInstance();
+        backbutton=findViewById(R.id.backbutton);
+        backbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(CsPostDetailActivity.this, CSBoardActivity.class));
+            }
+        });
 
         String authorId = getIntent().getStringExtra("AUTHOR_ID");
         String date = getIntent().getStringExtra("DATE");
