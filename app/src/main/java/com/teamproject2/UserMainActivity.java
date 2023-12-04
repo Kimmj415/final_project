@@ -5,12 +5,16 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -33,8 +37,12 @@ import com.teamproject2.models.Post;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class UserMainActivity extends AppCompatActivity {
+
+    private ImageView imageView;
+    private TextView textView;
     private AdView mAdView;
     private ImageView menu1,menu2,menu3,menu4;
     private ConstraintLayout infoPanel;
@@ -48,6 +56,7 @@ public class UserMainActivity extends AppCompatActivity {
     private Button logoutbutton;
     private FirebaseAuth mAuth= FirebaseAuth.getInstance();
     private TextView bannerText;
+    private String[] foodNames={"햄버거","피자","핫도그","토스트","떡볶이","우동","초밥","타코야끼","호떡","치킨","주먹밥","김밥","회","비빔밥","떡꼬치","라멘","삼계탕","짜장면","생선구이","만두","샐러드","파스타","스테이크"};
     private Handler handler;
     private int currentBanner = 0;
     private String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -57,6 +66,8 @@ public class UserMainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_main);
 
+        imageView = findViewById(R.id.imageView4);
+        textView = findViewById(R.id.textView);
         bookmark=findViewById(R.id.bookmark);
         mypost=findViewById(R.id.mypost);
         logoutbutton=findViewById(R.id.logoutButton);
@@ -72,6 +83,14 @@ public class UserMainActivity extends AppCompatActivity {
 
         fetchBookmarksFromFirestore();
         fetchMypostsFromFirestore();
+
+        ConstraintLayout constraintLayout = findViewById(R.id.foodlayout);
+        constraintLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startSlotMachineAnimation(6);
+            }
+        });
 
         bookmark.setLayoutManager(new LinearLayoutManager(UserMainActivity.this));
         bookmarkadapter = new RecyclerViewAdapter(bookmarklist, UserMainActivity.this);
@@ -143,6 +162,88 @@ public class UserMainActivity extends AppCompatActivity {
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
     }
+
+    private void startSlotMachineAnimation(final int repeatCount) {
+        final ObjectAnimator imageTranslationY = ObjectAnimator.ofFloat(imageView, "translationY", 0f, 500f);
+        imageTranslationY.setDuration(100);
+        imageTranslationY.setInterpolator(new DecelerateInterpolator());
+
+        final ObjectAnimator textTranslationY = ObjectAnimator.ofFloat(textView, "translationY", 0f, 500f);
+        textTranslationY.setDuration(100);
+        textTranslationY.setInterpolator(new DecelerateInterpolator());
+
+        // 여기서 변경된 부분
+        imageTranslationY.addListener(new AnimatorListenerAdapter() {
+            int count = 0;
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+
+                // 반복 횟수만큼 애니메이션을 반복
+                if (count < repeatCount) {
+                    count++;
+
+                    // 초기 위치로 되돌리기 위해 translationY를 0으로 설정
+                    ObjectAnimator resetImageTranslationY = ObjectAnimator.ofFloat(imageView, "translationY", 500f, 0f);
+                    resetImageTranslationY.setDuration(0);
+
+                    // 텍스트뷰도 초기 위치로 되돌리기 위해 translationY를 0으로 설정
+                    ObjectAnimator resetTextTranslationY = ObjectAnimator.ofFloat(textView, "translationY", 500f, 0f);
+                    resetTextTranslationY.setDuration(0);
+
+                    // 랜덤한 음식 선택
+                    Random random = new Random();
+                    int randomIndex = random.nextInt(foodNames.length);
+                    String selectedFood = foodNames[randomIndex];
+
+                    // 음식 이미지 설정
+                    int imageResourceId = getResources().getIdentifier("food" + (randomIndex + 1), "drawable", getPackageName());
+                    imageView.setImageResource(imageResourceId);
+
+                    // 음식 이름 설정
+                    textView.setText(selectedFood);
+
+                    // 초기 위치로 되돌리기
+                    resetImageTranslationY.start();
+                    resetTextTranslationY.start();
+
+                    // 딜레이를 줘서 다음 애니메이션 시작
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            imageTranslationY.start();
+                            textTranslationY.start();
+                        }
+                    }, 0);
+                }
+                ObjectAnimator resetImageTranslationY = ObjectAnimator.ofFloat(imageView, "translationY", 500f, 0f);
+                resetImageTranslationY.setDuration(0);
+
+                // 텍스트뷰도 초기 위치로 되돌리기 위해 translationY를 0으로 설정
+                ObjectAnimator resetTextTranslationY = ObjectAnimator.ofFloat(textView, "translationY", 500f, 0f);
+                resetTextTranslationY.setDuration(0);
+                Random random = new Random();
+                int randomIndex = random.nextInt(foodNames.length);
+                String selectedFood = foodNames[randomIndex];
+
+                // 음식 이미지 설정
+                int imageResourceId = getResources().getIdentifier("food" + (randomIndex + 1), "drawable", getPackageName());
+                imageView.setImageResource(imageResourceId);
+
+                // 음식 이름 설정
+                textView.setText(selectedFood+" 어때?");
+                resetImageTranslationY.start();
+                resetTextTranslationY.start();
+            }
+        });
+
+        // 첫 번째 애니메이션 시작
+        imageTranslationY.start();
+        textTranslationY.start();
+    }
+
+
 
     private void fetchBookmarksFromFirestore() {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -282,7 +383,7 @@ public class UserMainActivity extends AppCompatActivity {
         }
 
         String banner = banners[currentBanner];
-        bannerText.setText("#"+banner+"#");
+        bannerText.setText(banner);
 
         Animation slideDown = AnimationUtils.loadAnimation(this, R.anim.slide_down);
         bannerText.startAnimation(slideDown);
