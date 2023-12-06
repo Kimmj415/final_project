@@ -133,9 +133,9 @@ public class UserMainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 updateBanner();
-                handler.postDelayed(this, 6000);
+                handler.postDelayed(this, 4500);
             }
-        }, 6000);
+        }, 4500);
 
         logoutbutton.setOnClickListener(new View.OnClickListener() {
             @Override
